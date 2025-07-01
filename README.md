@@ -4,7 +4,7 @@
 
 ## 识别效果
 
-<p>
+<p align="center">
     <img src="output/1.png", height="300pt"> </img>
     <img src="output/2.png", height="300pt"> </img>
 </p>
