@@ -16,28 +16,30 @@ blurred = cv2.GaussianBlur(gray, (3, 3), 0)  # (5, 5) 是高斯核大小，0 是
 # - 第三个参数：高阈值
 # - 阈值的选择会影响边缘检测的效果
 edges = cv2.Canny(blurred, threshold1=3, threshold2=10)
-cv2.imshow('edges', edges)
+cv2.imshow("edges", edges)
 
 # 定义结构元素
 kernel = np.ones((5, 5), np.uint8)  # 3x3 的矩形结构元素
 closed = cv2.morphologyEx(edges, cv2.MORPH_CLOSE, kernel)
-cv2.imshow('closed', closed)
+cv2.imshow("closed", closed)
 blurred_closed = cv2.GaussianBlur(closed, (3, 3), 0)  # (5, 5) 是高斯核大小，0 是标准差
-cv2.imshow('blurred_closed', blurred_closed)
+cv2.imshow("blurred_closed", blurred_closed)
 
 # 3. 腐蚀操作
 eroded = cv2.erode(closed, kernel, iterations=1)  # 腐蚀 1 次
-cv2.imshow('eroded', eroded)
+cv2.imshow("eroded", eroded)
 
 # 4. 膨胀操作
 dilated = cv2.dilate(edges, kernel, iterations=1)  # 膨胀 1 次
-cv2.imshow('dilated', dilated)
+cv2.imshow("dilated", dilated)
 
 edges_2 = cv2.Canny(dilated, threshold1=6, threshold2=18)
-cv2.imshow('edges_2', edges_2)
+cv2.imshow("edges_2", edges_2)
 
 # 2. 应用霍夫变换检测直线
-lines = cv2.HoughLinesP(edges_2, rho=1, theta=np.pi / 180, threshold=100,  minLineLength=100, maxLineGap=50)
+lines = cv2.HoughLinesP(
+    edges_2, rho=1, theta=np.pi / 180, threshold=100, minLineLength=100, maxLineGap=50
+)
 # 4. 绘制检测到的直线
 if lines is not None:
     print(f"number of lines: {len(lines)}")
@@ -45,7 +47,7 @@ if lines is not None:
         x1, y1, x2, y2 = line[0]  # 获取直线的两个端点
         cv2.line(image, (x1, y1), (x2, y2), (0, 255, 0), 2)  # 在原图上绘制绿色直线
 
-cv2.imshow('lines', image)
+cv2.imshow("lines", image)
 
 # 等待用户按键后关闭窗口
 cv2.waitKey(0)

@@ -6,15 +6,17 @@ import tensorflow as tf
 MODEL_PATH = "../model/M-LSD_320_tiny_fp32.tflite"
 INPUT_SIZE = 320  # 模型尺寸 must match
 
+
 def preprocess(img: np.ndarray):
     h, w = img.shape[:2]
     scale = INPUT_SIZE / max(h, w)
-    resized = cv2.resize(img, (int(w*scale), int(h*scale)))
+    resized = cv2.resize(img, (int(w * scale), int(h * scale)))
     pad = np.zeros((INPUT_SIZE, INPUT_SIZE, 4), dtype=np.uint8)
-    pad[:resized.shape[0], :resized.shape[1], :3] = resized
-    pad[...,3] = 255  # alpha 通道
+    pad[: resized.shape[0], : resized.shape[1], :3] = resized
+    pad[..., 3] = 255  # alpha 通道
     inp = pad.astype(np.float32) / 255.0
     return inp[np.newaxis, ...]
+
 
 def postprocess(pred: np.ndarray, scale: float, threshold=0.2):
     """
@@ -46,9 +48,10 @@ def postprocess(pred: np.ndarray, scale: float, threshold=0.2):
 
 def draw(img, lines):
     vis = img.copy()
-    for (p0,p1) in lines:
-        cv2.line(vis, p0, p1, (0,255,0), 2)
+    for p0, p1 in lines:
+        cv2.line(vis, p0, p1, (0, 255, 0), 2)
     return vis
+
 
 def main():
     img = cv2.imread("../output/cropped_1.png")
@@ -58,17 +61,20 @@ def main():
     # TFLite 推理
     interp = tf.lite.Interpreter(MODEL_PATH)
     interp.allocate_tensors()
-    input_index = interp.get_input_details()[0]['index']
+    input_index = interp.get_input_details()[0]["index"]
     output_details = interp.get_output_details()
     interp.set_tensor(input_index, inp)
     interp.invoke()
     # outputs = [interp.get_tensor(o['index'])[0] for o in output_details]
-    output_tensor = interp.get_tensor(output_details[0]['index'])  # shape: [1, 320, 320, 7]
+    output_tensor = interp.get_tensor(
+        output_details[0]["index"]
+    )  # shape: [1, 320, 320, 7]
     print(f"output_shape: {output_tensor.shape}")
     lines = postprocess(output_tensor, scale=INPUT_SIZE / max(img.shape[:2]))
     vis = draw(img, lines)
     cv2.imshow("MLSD result", vis)
     cv2.waitKey(0)
+
 
 if __name__ == "__main__":
     main()

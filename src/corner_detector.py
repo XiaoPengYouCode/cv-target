@@ -95,7 +95,6 @@ def detect_corners(image) -> np.array:
     return rect
 
 
-
 # 辅助函数，封装原有的detect_corners逻辑，并返回处理后的图像
 def _detect_corners_and_return_image(image) -> tuple[np.array, np.array]:
     # Resize the image for better processing (optional)
@@ -195,14 +194,18 @@ if __name__ == "__main__":
         # 我将让 `detect_corners` 返回处理后的图像和排序后的角点。
 
         # 优化 detect_corners 函数，使其返回处理后的图像和角点
-        corners, processed_image_for_display = _detect_corners_and_return_image(original_image.copy())
+        corners, processed_image_for_display = _detect_corners_and_return_image(
+            original_image.copy()
+        )
 
         # 在处理后的图像上绘制检测到的轮廓和角点
         if corners is not None and processed_image_for_display is not None:
             # 绘制轮廓 (注意：这里的corners已经是排序好的)
             # 由于 corners 是 (4, 2) 的 float32 数组，需要将其转换为 (4, 1, 2) 的 int32 才能用于 drawContours
             page_contour_to_draw = np.array([corners], dtype=np.int32)
-            cv2.drawContours(processed_image_for_display, [page_contour_to_draw], -1, (0, 255, 0), 2)
+            cv2.drawContours(
+                processed_image_for_display, [page_contour_to_draw], -1, (0, 255, 0), 2
+            )
 
             # 突出显示角点
             for point in corners:
