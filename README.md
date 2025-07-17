@@ -20,5 +20,3 @@ src/
 ├── circle_detector.py # 色环识别
 └── corner_detector.py # 靶纸角落识别(under_dev)
 ```
-
-
