@@ -1,9 +1,13 @@
-"""色环轮廓的识别"""
+"""
+基于HSV阈值的射箭靶色环轮廓的识别
 
-from typing import List
+作者: XiaoPengYouCode
+版本: 0.1.0
+"""
+
+from pathlib import Path
 import cv2
 import numpy as np
-import os
 import logging as log
 
 # HSV空间阈值
@@ -28,9 +32,9 @@ hsv_thresholds = {
 
 def clean_mask(
     hsv_image: np.ndarray,
-    lower_bounds: List[np.ndarray],
-    upper_bounds: List[np.ndarray],
-    kernel_size: Tuple[int, int] = (7, 7),
+    lower_bounds: list[np.ndarray],
+    upper_bounds: list[np.ndarray],
+    kernel_size: tuple[int, int] = (7, 7),
     debug: bool = False,
 ) -> np.ndarray:
     """通过HSV空间阈值得到轮廓完整, 无外部噪点的单一颜色掩码
@@ -41,9 +45,9 @@ def clean_mask(
 
     Args:
         hsv_image (np.ndarray): HSV空间的图像
-        lower_bounds (List[np.ndarray]): 下阈值列表
-        upper_bounds (List[np.ndarray]): 上阈值列表
-        kernel_size (Tuple[int, int]): 形态学操作核大小, 默认为 (7, 7)
+        lower_bounds (list[np.ndarray]): 下阈值列表
+        upper_bounds (list[np.ndarray]): 上阈值列表
+        kernel_size (tuple[int, int]): 形态学操作核大小, 默认为 (7, 7)
 
     Returns:
         np.ndarray: 单一颜色掩码
@@ -91,7 +95,7 @@ def clean_mask(
     if num_labels <= 1:
         log.warning("未能检测到有效连通域, 返回空掩码")
         return np.zeros_like(opened_mask)
-    # 找到最大连通域的索引
+    # 找到最大连通域的索引, 并基于连通域构建掩码
     largest_label = 1 + int(np.argmax(stats[1:, cv2.CC_STAT_AREA]))
     cleaned_mask = np.uint8(labels == largest_label) * 255
 
@@ -105,22 +109,22 @@ def clean_mask(
 
 
 def main():
-    # 读取文件并进行resize操作(原图尺寸较大)
+    # 读取文件并进行resize操作
     idx = 2
-    input_image_path = f"imgs/img_{idx}.jpg"
-    if not os.path.exists(input_image_path):
+    input_image_path = Path('imgs') / f"img_{idx}.jpg"
+    if not input_image_path.exists():
         print(f"Error: Input file does not exist at '{input_image_path}'.")
         return
     raw_image = cv2.imread(input_image_path)
     if raw_image is None:
         print(f"Error: Could not load image: {input_image_path}")
         return
+
     # destination size(dsize)
     image = cv2.resize(raw_image, (360, 640), None, None, interpolation=cv2.INTER_AREA)
-    gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
+    gray = cv2.cvtColor(image, cv2.COLOR_RGB2GRAY)
     result_image_with_fit = image.copy()
-
-    # 转换色度空间
+    # 转换至 HSV 色度空间
     hsv = cv2.cvtColor(image, cv2.COLOR_BGR2HSV)
 
     # 遍历得到不同的颜色的外部轮廓
@@ -128,8 +132,6 @@ def main():
         cleaned_mask = clean_mask(hsv, hsv_threshold["lower"], hsv_threshold["upper"])
         # 使用bitwise_and保留掩码区域内容
         masked_image = cv2.bitwise_and(image, image, mask=cleaned_mask)
-        cv2.imshow("Result", masked_image)
-        cv2.waitKey(0)
 
         if np.sum(cleaned_mask) == 0:
             print(f" - Could not find the '{color_name}' region.")
@@ -148,9 +150,10 @@ def main():
             # 基于凸包进行椭圆拟合
             if len(hull) >= 5:
                 ellipse = cv2.fitEllipse(hull)
+                # 在原图上绘制椭圆
                 cv2.ellipse(result_image_with_fit, ellipse, (80, 80, 255), 2)
 
-                # 如果是蓝色，构建一个靶面完整mask(用于扣出完整靶面)
+                # 如果是蓝色, 构建一个靶面完整mask(用于扣出完整靶面)
                 if color_name == "blue":
                     full_target_mask = np.zeros_like(gray, dtype=np.uint8)
                     full_target_mask = (
@@ -166,7 +169,7 @@ def main():
                     )
 
                     # 下方通过裁剪得到roi，也可直接使用cv2 roi
-                    side_length = 400
+                    side_length = 245
                     center_point = tuple(map(int, ellipse[0]))
                     h, w = without_target_image.shape[:2]
                     half_len = side_length // 2
@@ -177,7 +180,7 @@ def main():
                     y2 = min(h, center_point[1] + half_len)
                     cropped = image[y1:y2, x1:x2]
                     cv2.imshow("cropped", cropped)
-                    cropped_output_path = f"../output/cropped_{idx}.png"
+                    cropped_output_path = f"output/cropped_{idx}.png"
                     if not cv2.imwrite(cropped_output_path, cropped):
                         print(f"Error: Could not write the '{cropped}' image.")
                         return
@@ -190,11 +193,14 @@ def main():
                 print(
                     f"({color_name.capitalize()}): Center≈{center}, Axes≈({axes[1]:.0f}, {axes[0]:.0f})"
                 )
+    
+        cv2.imshow(f"Result_{color_name}", masked_image)
 
-    cv2.destroyWindow("Result")
-    output_path_fit = f"../output/{idx}.png"
-    if not cv2.imwrite(output_path_fit, result_image_with_fit):
-        print(f"Error: Could not write the '{output_path_fit}' image.")
+    cv2.waitKey(0)
+    cv2.destroyAllWindows()
+    output_path = Path("output") / f"{idx}.png"
+    if not cv2.imwrite(output_path, result_image_with_fit):
+        print(f"Error: Could not write the '{output_path}' image.")
         return
 
     cv2.imshow("Final Result (Hull Optimized to Ellipse)", result_image_with_fit)
