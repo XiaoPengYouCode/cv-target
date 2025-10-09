@@ -27,13 +27,16 @@ jobs:
       - name: Install dependencies
         run: |
           sudo apt-get update
-          sudo apt-get install -y wget unzip brew
+          sudo apt-get install -y wget unzip
 
       - name: Install Allure commandline
         run: |
-          brew install allure
+          wget https://github.com/allure-framework/allure2/releases/download/2.35.1/allure-2.35.1.tgz
+          tar -zxvf allure-2.35.1.tgz
+          sudo mv allure-2.35.1 /opt/allure
+          sudo ln -s /opt/allure/bin/allure /usr/bin/allure
 
-      - name: Install dependencies
+      - name: Install python dependencies
         run: |
           python -m pip install .
           
