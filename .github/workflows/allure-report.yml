@@ -26,6 +26,15 @@ jobs:
 
       - name: Install dependencies
         run: |
+          sudo apt-get update
+          sudo apt-get install -y wget unzip brew
+
+      - name: Install Allure commandline
+        run: |
+          brew install allure
+
+      - name: Install dependencies
+        run: |
           python -m pip install .
           
       - name: Run tests with Allure
