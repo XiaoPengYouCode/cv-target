@@ -1,4 +1,5 @@
 .idea
 .venv
 .pytest_cache
-.allure*
+__pycache__
+allure*
