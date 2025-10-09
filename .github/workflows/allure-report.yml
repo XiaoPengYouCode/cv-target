@@ -54,7 +54,10 @@ jobs:
       - name: Copy Allure history
         if: always()
         run: |
-          if [ -d gh-pages/history ]; then cp -r gh-pages/history/* allure-results/history/; fi
+          if [ -d gh-pages/history ]; then
+            mkdir -p allure-results/history &&
+            cp -r gh-pages/history/* allure-results/history/
+          fi
 
       - name: Generate Allure report
         if: always()
