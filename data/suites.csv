@@ -1,0 +1,5 @@
+"DESCRIPTION","DURATION IN MS","NAME","PARENT SUITE","START TIME","STATUS","STOP TIME","SUB SUITE","SUITE","TEST CLASS","TEST METHOD"
+"This test is skipped intentionally.","0","test_skipped","tests","2025-10-09","skipped","2025-10-09","","test_opencv","",""
+"This test is expected to fail.","1","test_failure","tests","2025-10-09","failed","2025-10-09","","test_opencv","",""
+"This test raises an exception.","0","test_broken","tests","2025-10-09","broken","2025-10-09","","test_opencv","",""
+"This test is expected to pass.","0","test_success","tests","2025-10-09","passed","2025-10-09","","test_opencv","",""
