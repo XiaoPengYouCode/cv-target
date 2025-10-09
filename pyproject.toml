@@ -7,4 +7,6 @@ dependencies = [
     "opencv-python",
     "numpy",
     "logging>=0.4.9.6",
+    "pytest>=8.4.2",
+    "allure-pytest>=2.15.0",
 ]
