@@ -7,6 +7,11 @@ def test_success():
     assert 1 + 1 == 2
 
 
+@allure.description("This test is expected to pass as well.")
+def test_another_success():
+    assert "hello".upper() == "HELLO"
+
+
 @allure.description("This test is expected to fail.")
 def test_failure():
     assert 1 + 1 == 3
