@@ -111,7 +111,7 @@ def clean_mask(
 def main():
     # 读取文件并进行resize操作
     idx = 2
-    input_image_path = Path('imgs') / f"img_{idx}.jpg"
+    input_image_path = Path("imgs") / f"img_{idx}.jpg"
     if not input_image_path.exists():
         print(f"Error: Input file does not exist at '{input_image_path}'.")
         return
@@ -193,7 +193,7 @@ def main():
                 print(
                     f"({color_name.capitalize()}): Center≈{center}, Axes≈({axes[1]:.0f}, {axes[0]:.0f})"
                 )
-    
+
         cv2.imshow(f"Result_{color_name}", masked_image)
 
     cv2.waitKey(0)
